@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "dgSpecHash": "tlUkhbafoft8x8OjBsTfjktHZNAVjqArYp9kj8AThRbbWdwfN22Xf9LP5eIbz5Vk0I7NA+thgLrFoKwurTW4sw==",
+  "success": true,
+  "projectFilePath": "C:\\source\\DanceBalls\\DanceBalls.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\User\\.nuget\\packages\\microsoft.maui.graphics\\8.0.0-preview.7.8842\\microsoft.maui.graphics.8.0.0-preview.7.8842.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\microsoft.maui.graphics.skia\\8.0.0-preview.7.8842\\microsoft.maui.graphics.skia.8.0.0-preview.7.8842.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.9\\microsoft.netcore.platforms.3.1.9.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\opentk\\3.3.3\\opentk.3.3.3.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\opentk.glcontrol\\3.3.3\\opentk.glcontrol.3.3.3.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\skiasharp\\2.88.4-preview.89\\skiasharp.2.88.4-preview.89.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\skiasharp.nativeassets.macos\\2.88.4-preview.89\\skiasharp.nativeassets.macos.2.88.4-preview.89.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\skiasharp.nativeassets.win32\\2.88.4-preview.89\\skiasharp.nativeassets.win32.2.88.4-preview.89.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\skiasharp.views.desktop.common\\2.88.4-preview.89\\skiasharp.views.desktop.common.2.88.4-preview.89.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\skiasharp.views.windowsforms\\2.88.4-preview.89\\skiasharp.views.windowsforms.2.88.4-preview.89.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\system.drawing.common\\4.7.3\\system.drawing.common.4.7.3.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'OpenTK 3.3.3' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net7.0-windows7.0'. This package may not be fully compatible with your project.",
+      "libraryId": "OpenTK",
+      "targetGraphs": [
+        "net7.0-windows7.0"
+      ]
+    }
+  ]
+}

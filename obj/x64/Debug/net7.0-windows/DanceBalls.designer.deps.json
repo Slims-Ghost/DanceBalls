@@ -1,0 +1,259 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v7.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v7.0": {
+      "Microsoft.Maui.Graphics/8.0.0-preview.7.8842": {
+        "dependencies": {
+          "System.Numerics.Vectors": "4.5.0"
+        },
+        "runtime": {
+          "lib/netstandard2.1/Microsoft.Maui.Graphics.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "8.0.0.4"
+          }
+        }
+      },
+      "Microsoft.Maui.Graphics.Skia/8.0.0-preview.7.8842": {
+        "dependencies": {
+          "Microsoft.Maui.Graphics": "8.0.0-preview.7.8842",
+          "SkiaSharp": "2.88.4-preview.89"
+        },
+        "runtime": {
+          "lib/netstandard2.1/Microsoft.Maui.Graphics.Skia.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "8.0.0.4"
+          }
+        }
+      },
+      "Microsoft.NETCore.Platforms/3.1.9": {},
+      "Microsoft.Win32.SystemEvents/4.7.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "3.1.9"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Win32.SystemEvents.dll": {
+            "assemblyVersion": "4.0.2.0",
+            "fileVersion": "4.700.19.56404"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/netcoreapp3.0/Microsoft.Win32.SystemEvents.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "4.0.2.0",
+            "fileVersion": "4.700.19.56404"
+          }
+        }
+      },
+      "OpenTK/3.3.3": {
+        "runtime": {
+          "lib/net20/OpenTK.dll": {
+            "assemblyVersion": "3.3.3.0",
+            "fileVersion": "3.3.3.0"
+          }
+        }
+      },
+      "OpenTK.GLControl/3.3.3": {
+        "dependencies": {
+          "OpenTK": "3.3.3"
+        },
+        "runtime": {
+          "lib/net20/OpenTK.GLControl.dll": {
+            "assemblyVersion": "3.3.3.0",
+            "fileVersion": "3.3.3.0"
+          }
+        }
+      },
+      "SkiaSharp/2.88.4-preview.89": {
+        "dependencies": {
+          "SkiaSharp.NativeAssets.Win32": "2.88.4-preview.89",
+          "SkiaSharp.NativeAssets.macOS": "2.88.4-preview.89"
+        },
+        "runtime": {
+          "lib/net6.0/SkiaSharp.dll": {
+            "assemblyVersion": "2.88.0.0",
+            "fileVersion": "2.88.3.0"
+          }
+        }
+      },
+      "SkiaSharp.NativeAssets.macOS/2.88.4-preview.89": {
+        "runtimeTargets": {
+          "runtimes/osx/native/libSkiaSharp.dylib": {
+            "rid": "osx",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "SkiaSharp.NativeAssets.Win32/2.88.4-preview.89": {
+        "runtimeTargets": {
+          "runtimes/win-arm64/native/libSkiaSharp.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libSkiaSharp.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libSkiaSharp.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "SkiaSharp.Views.Desktop.Common/2.88.4-preview.89": {
+        "dependencies": {
+          "SkiaSharp": "2.88.4-preview.89",
+          "System.Drawing.Common": "4.7.3"
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/SkiaSharp.Views.Desktop.Common.dll": {
+            "assemblyVersion": "2.88.0.0",
+            "fileVersion": "2.88.3.0"
+          }
+        }
+      },
+      "SkiaSharp.Views.WindowsForms/2.88.4-preview.89": {
+        "dependencies": {
+          "OpenTK": "3.3.3",
+          "OpenTK.GLControl": "3.3.3",
+          "SkiaSharp": "2.88.4-preview.89",
+          "SkiaSharp.Views.Desktop.Common": "2.88.4-preview.89"
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/SkiaSharp.Views.WindowsForms.dll": {
+            "assemblyVersion": "2.88.0.0",
+            "fileVersion": "2.88.3.0"
+          }
+        }
+      },
+      "System.Drawing.Common/4.7.3": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "3.1.9",
+          "Microsoft.Win32.SystemEvents": "4.7.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.Drawing.Common.dll": {
+            "assemblyVersion": "4.0.0.2",
+            "fileVersion": "4.6.29719.1"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/unix/lib/netcoreapp3.0/System.Drawing.Common.dll": {
+            "rid": "unix",
+            "assetType": "runtime",
+            "assemblyVersion": "4.0.2.3",
+            "fileVersion": "4.700.21.51508"
+          },
+          "runtimes/win/lib/netcoreapp3.0/System.Drawing.Common.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "4.0.2.3",
+            "fileVersion": "4.700.21.51508"
+          }
+        }
+      },
+      "System.Numerics.Vectors/4.5.0": {}
+    }
+  },
+  "libraries": {
+    "Microsoft.Maui.Graphics/8.0.0-preview.7.8842": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-2ea7Lqm77IDfoVyby57PC1fAgBQ83U+Vyqh5Dyj2Uwa7L0X8mPBcpxT6xtiLned7iAphgvXXSNYW5o9YhBzn/g==",
+      "path": "microsoft.maui.graphics/8.0.0-preview.7.8842",
+      "hashPath": "microsoft.maui.graphics.8.0.0-preview.7.8842.nupkg.sha512"
+    },
+    "Microsoft.Maui.Graphics.Skia/8.0.0-preview.7.8842": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dhEb3y1bqbN6XNbjobyf71c3JOGx9a3poqKv3+CV1SoBcmxjOYbQdGr2EJs3QFeDMalcu+wgIhy+X4puEC5dZw==",
+      "path": "microsoft.maui.graphics.skia/8.0.0-preview.7.8842",
+      "hashPath": "microsoft.maui.graphics.skia.8.0.0-preview.7.8842.nupkg.sha512"
+    },
+    "Microsoft.NETCore.Platforms/3.1.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-e+/BrhryHoMojWlbcPJAFcShpk3JYvsMfrmoM26dnvHARWR6vtmGbfHppZcANVqf7DUBDIRxlZXcWg7v/9e1TQ==",
+      "path": "microsoft.netcore.platforms/3.1.9",
+      "hashPath": "microsoft.netcore.platforms.3.1.9.nupkg.sha512"
+    },
+    "Microsoft.Win32.SystemEvents/4.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-mtVirZr++rq+XCDITMUdnETD59XoeMxSpLRIII7JRI6Yj0LEDiO1pPn0ktlnIj12Ix8bfvQqQDMMIF9wC98oCA==",
+      "path": "microsoft.win32.systemevents/4.7.0",
+      "hashPath": "microsoft.win32.systemevents.4.7.0.nupkg.sha512"
+    },
+    "OpenTK/3.3.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-KtnygHEuYj4+agNsZRtzh5iSiKlelDZvDB/OhfebEvIDX/97Pzygv8n5llZHgrI7Xa29vvkucVBeN55R6/k+4w==",
+      "path": "opentk/3.3.3",
+      "hashPath": "opentk.3.3.3.nupkg.sha512"
+    },
+    "OpenTK.GLControl/3.3.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-OJKQN4s7tCzdDUoLmrEEwAzywlhIu/vmLO+qhUG4FAUKwaxNqyGYbdLgzgH4RtNzP6Qs8ZDx0RxNHXyn/DPgUA==",
+      "path": "opentk.glcontrol/3.3.3",
+      "hashPath": "opentk.glcontrol.3.3.3.nupkg.sha512"
+    },
+    "SkiaSharp/2.88.4-preview.89": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-YAtGHSIQ1cEJ61JtpcZkF8849Hi/kfeVyHkldgHLjtFSAeOTU0vdvP9IyeUMDXoGqVS/1IZEDCrVoU91i5wVTA==",
+      "path": "skiasharp/2.88.4-preview.89",
+      "hashPath": "skiasharp.2.88.4-preview.89.nupkg.sha512"
+    },
+    "SkiaSharp.NativeAssets.macOS/2.88.4-preview.89": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-yoJMwk4xNVMtiQGZ/qHLY7Sdm5SSe8XYrBbPCar+vsk4nWAFA2B3SKTT4r9VVftmUFgd+p+KDbMONjWQHdo0Jg==",
+      "path": "skiasharp.nativeassets.macos/2.88.4-preview.89",
+      "hashPath": "skiasharp.nativeassets.macos.2.88.4-preview.89.nupkg.sha512"
+    },
+    "SkiaSharp.NativeAssets.Win32/2.88.4-preview.89": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ASqi8j6cP1flntoxj6whoFSnJYMRZJuQn/MYrMqsaXk0C3AB9qM1gr7cXq7c9G11kvr/jd8GsoQP0j431iIjHQ==",
+      "path": "skiasharp.nativeassets.win32/2.88.4-preview.89",
+      "hashPath": "skiasharp.nativeassets.win32.2.88.4-preview.89.nupkg.sha512"
+    },
+    "SkiaSharp.Views.Desktop.Common/2.88.4-preview.89": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dhH6FMZ2+cVtOl+yoKbuV8oUxxVtIRipAKQni+49JpXUDUdWbar4q/DDX1nZfRgjK+Du3iQFAzHyL0i4XFqHcw==",
+      "path": "skiasharp.views.desktop.common/2.88.4-preview.89",
+      "hashPath": "skiasharp.views.desktop.common.2.88.4-preview.89.nupkg.sha512"
+    },
+    "SkiaSharp.Views.WindowsForms/2.88.4-preview.89": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-l02VSwK+fATRzZNBleRericbLA7ajtWzH4nc9mlgzbfbI6AtmnWD/xgFFFUDm2Bq73qkW8SE+j4wpfb3xv5S6w==",
+      "path": "skiasharp.views.windowsforms/2.88.4-preview.89",
+      "hashPath": "skiasharp.views.windowsforms.2.88.4-preview.89.nupkg.sha512"
+    },
+    "System.Drawing.Common/4.7.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-B3+wwhAeoUQ6KeshWSq3IRLQiMoqPEzSHzyVyxTI/EbYuqIp90lXrRISlip2AF+5tj74ycIVPpnRY4M424HahA==",
+      "path": "system.drawing.common/4.7.3",
+      "hashPath": "system.drawing.common.4.7.3.nupkg.sha512"
+    },
+    "System.Numerics.Vectors/4.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-QQTlPTl06J/iiDbJCiepZ4H//BVraReU4O4EoRw1U02H5TLUIT7xn3GnDp9AXPSlJUDyFs4uWjWafNX6WrAojQ==",
+      "path": "system.numerics.vectors/4.5.0",
+      "hashPath": "system.numerics.vectors.4.5.0.nupkg.sha512"
+    }
+  }
+}
