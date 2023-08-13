@@ -17,9 +17,6 @@ C:\source\DanceBalls\bin\x64\Debug\net7.0-windows\runtimes\win-arm64\native\libS
 C:\source\DanceBalls\bin\x64\Debug\net7.0-windows\runtimes\win-x64\native\libSkiaSharp.dll
 C:\source\DanceBalls\bin\x64\Debug\net7.0-windows\runtimes\win-x86\native\libSkiaSharp.dll
 C:\source\DanceBalls\obj\x64\Debug\net7.0-windows\DanceBalls.csproj.AssemblyReference.cache
-C:\source\DanceBalls\obj\x64\Debug\net7.0-windows\DanceBalls.MainForm.resources
-C:\source\DanceBalls\obj\x64\Debug\net7.0-windows\TestMauiGraphics.MauiTest.resources
-C:\source\DanceBalls\obj\x64\Debug\net7.0-windows\DanceBalls.SkiaTest.resources
 C:\source\DanceBalls\obj\x64\Debug\net7.0-windows\DanceBalls.SkiaToo.resources
 C:\source\DanceBalls\obj\x64\Debug\net7.0-windows\DanceBalls.csproj.GenerateResource.cache
 C:\source\DanceBalls\obj\x64\Debug\net7.0-windows\DanceBalls.GeneratedMSBuildEditorConfig.editorconfig

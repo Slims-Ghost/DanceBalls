@@ -1,226 +1,246 @@
-﻿using System;
+﻿using SkiaSharp;
+using SkiaSharp.Views.Desktop;
+using System;
+using System.Numerics;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Collections.Concurrent;
 
 namespace DanceBalls
 {
     internal class Game
     {
-        public Bitmap Bitmap { get; set; } = new(1, 1);
-        public Stopwatch GameClock { get; set; } = new();
-        private Random rand = new Random();
-        private Color BackgroundColor;
+        #region Member vars/props
+        public GameState GameState { get; private set; }
+        public readonly Stopwatch GameClock = new Stopwatch();
+        private long TicksSinceLastUpdate = 0;
+        private long LastUpdateTicks = 0;
         private float ClientWidth;
         private float ClientHeight;
-        private Rectangle ClientBounds;
-        private RectangleF ScaleBounds;
-        private PointF ScaleCenter;
-        private float AspectRatio;
-        private float ScaleHeight;
-        private float ScaleWidth;
-        private float ScaleLeft;
-        private float ScaleRight;
-        private float ScaleTop;
-        private float ScaleBottom;
+        public Rectangle ClientBounds;
+        public RectangleF ScaleBounds;
+        public PointF ScaleCenter;
+        public float AspectRatio;
+        public float ScaleHeight;
+        public float ScaleWidth;
+        public float ScaleLeft;
+        public float ScaleRight;
+        public float ScaleTop;
+        public float ScaleBottom;
+        public float ScaleFactor;
         private const float ONE_PI = (float)Math.PI;
         private const float TWO_PI = ONE_PI * 2;
         private const float RAD_TO_DEGREES = 180 / ONE_PI;
         private const float DEGREES_TO_RAD = ONE_PI / 180;
-        public object BitmapLocker = new();
-        private System.Timers.Timer GameTimer { get; set; } = new();
-        public List<Ball> balls= new();
-        public Ball b1;
-        public Ball b2;
-        public long TicksSinceLastUpdate = 0;
-        public long LastUpdateTicks = 0;
-        public GameState GameState { get; private set; } = GameState.Setup;
-        private Bitmap OrbImage = (Bitmap)Image.FromFile(Path.Combine(AppRoot, "orb.png"));
-        private static readonly string AppRoot = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
-        
-        private float rotationEachSecond = ONE_PI / 6;
+        public static readonly string AppRoot = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
+        private float rotationEachSecond = ONE_PI;
+        public Bumper Bumper { get; set; }
+        public ConcurrentDictionary<int, Bogey> Bogeys = new();
+        public ConcurrentQueue<Vector2> BumperSpeedHistory = new();
+        private const int BumperSpeedQueueLength = 10;
+        public static int BogeySequence = 0;
+        private Random rand = new();
+        private SKColor Color_MajorGridLine = new(0x40, 0x40, 0x70);
+        private SKColor Color_MinorGridLine = new(0x10, 0x10, 0x40);
+        private SKColor Color_Axis = new(0x40, 0x40, 0x70);
+        private SKColor Color_Background = new(0x0, 0x0, 0x14);
+        #endregion
 
-        public Game(Rectangle clientBounds, Color backgroundColor) 
+        public Game(Rectangle clientBounds) 
         {
             GameState = GameState.Setup;
-            GameClock.Start();
+            //ScaleHeight drives the rest of the Scale dimensions;
+            ScaleHeight = 200f;
             SetScale(clientBounds);
-            BackgroundColor = backgroundColor;
-            GameTimer.Interval = 25;
-            GameTimer.AutoReset = false;
-            GameTimer.Elapsed += GameTimer_Elapsed;
             InitBalls();
+            SetScale(clientBounds);
+
             GameState = GameState.Ready;
-            GameTimer.Start();
+            GameClock.Start();
         }
 
-        public void InitBalls()
+        private void InitBalls()
         {
-            //balls.Clear();
+            Bogeys.Clear();
 
-            //b1 = new() { D = 55, Theta = ONE_PI / 4, Radius = 30, Color = Color.Magenta, };
-            //var ballSizedImage = Helpers.ResizeImage(OrbImage, ScaleToClient(b1.Bounds));
-            //b1.Bitmap = ballSizedImage;
-            //balls.Add(b1);
+            Bumper = new(this, 0, 0, 13);
 
-            //b2 = new() { X = -60, Y = -20, Radius = 50, Color = Color.Cyan, };
-            //b2.Bitmap = Helpers.ResizeImage(OrbImage, ScaleToClient(b2.Bounds));
-            //balls.Add(b2);
+
+            Bogey b1 = new(this, 50, 50, 10);
+            b1.Speed = new Vector2(0, -35);
+            AddBogey(b1);
+
+            Bogey b2 = new(this, -50, -25, 15);
+            b2.Speed = new Vector2(-20, 20);
+            AddBogey(b2);
+
+            AddNewBogey();
+            AddNewBogey();
+            AddNewBogey();
+
+            var bogeyGen = new BogeyGenerator(this);
+            bogeyGen.Start();
+        }
+        public void AddBogey(Bogey bogey)
+        {
+            var index = Interlocked.Increment(ref BogeySequence);
+            Bogeys.TryAdd(index, bogey);
         }
 
+        public void AddNewBogey()
+        {
+            AddBogey(NewBogey());
+        }
 
-        private void GameTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        private Bogey NewBogey() 
+        {
+            float radius = 10 + 5 * (float)rand.NextDouble();
+            // Select a random side
+            var side = rand.Next(4);
+            Vector2 bogeyPosition;
+            if (side == 0) // Top
+            {
+                bogeyPosition = new Vector2(ScaleLeft + ScaleWidth * (float)rand.NextDouble(), ScaleTop + radius - 1);
+            }
+            else if (side == 1) // Right
+            {
+                bogeyPosition = new Vector2(ScaleRight + radius - 1, ScaleTop - ScaleHeight * (float)rand.NextDouble());
+            }
+            else if (side == 2) // Bottom
+            {
+                bogeyPosition = new Vector2(ScaleLeft + ScaleWidth * (float)rand.NextDouble(), ScaleBottom - radius + 1);
+            }
+            else // Left
+            {
+                bogeyPosition = new Vector2(ScaleLeft - radius + 1, ScaleTop - ScaleHeight * (float)rand.NextDouble());
+            }
+            var centerPosition = new Vector2(ScaleCenter.X, ScaleCenter.Y);
+            var speedDirection = (centerPosition - bogeyPosition).Normalize();
+            Vector2 bogeySpeed = speedDirection * (30 + 60 * (float)rand.NextDouble());
+            return new Bogey(this, bogeyPosition, radius, bogeySpeed);
+        }
+
+        public void Advance()
         {
             TicksSinceLastUpdate = LastUpdateTicks == 0 ? 0 : GameClock.ElapsedTicks - LastUpdateTicks;
             var timeSinceLastUpdate = TimeSpan.FromTicks(TicksSinceLastUpdate);
 
-            float rotation = (float)timeSinceLastUpdate.TotalSeconds * rotationEachSecond;
-            b1.Theta = (b1.Theta + rotation).NormalizeRadians();
-            
-
-            GameTimer.Start();
-            LastUpdateTicks = GameClock.ElapsedTicks;
-        }
-
-        public async Task DrawAsync()
-        {
-            await Task.Run(() =>
+            Vector2 CurrentBumperSpeed;
+            if (Bumper.RequestedPosition != Bumper.Position)
             {
-                lock (BitmapLocker)
-                {
-                    using var g = Graphics.FromImage(Bitmap);
-                    g.Clear(BackgroundColor);
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
-                    DrawGrid(g);
-                    DrawObjects(g);
-                }
-            });
-        }
-
-        private void DrawObjects(Graphics g)
-        {
-
-            foreach (var ball in balls)
-            {
-                DrawBall(g, ball);
-            }
-        }
-
-        private void DrawBall(Graphics g, Ball ball)
-        {
-            //g.FillEllipse(new SolidBrush(color), ScaleToClient(ball.Bounds));
-            if (ball.X == -60) { }
-            //g.DrawImageUnscaled(ball.Bitmap!, ScaleToClient(ball.Bounds));
-        }
-
-        private void DrawLine(Graphics g, Pen pen, Line line)
-        {
-            g.DrawLine(pen, ScaleToClient(line.p1), ScaleToClient(line.p2));
-        }
-
-        private void DrawLine(Graphics g, Pen pen, PointF p1, PointF p2)
-        {
-            g.DrawLine(pen, ScaleToClient(p1), ScaleToClient(p2));
-        }
-
-        private void DrawLine(Graphics g, Pen pen, float x1, float y1, float x2, float y2)
-        {
-            g.DrawLine(pen, ScaleToClient(new PointF(x1, y1)), ScaleToClient(new PointF(x2, y2)));
-        }
-
-        private void DrawLines(Graphics g, Pen pen, List<PointF> points, bool rounded = false)
-        {
-            var pColor = Color.DarkGoldenrod;
-            var lPen = new Pen(Color.DarkCyan, 3);
-            var bPen = new Pen(Color.DarkCyan, 3);
-            var smallPen = new Pen(Color.Red, 1);
-            var scaledPoints = points.Select(p => ScaleToClient(p)).ToArray();
-            if (scaledPoints.Length < 2) return;
-            if (scaledPoints.Length == 2)
-            {
-                g.DrawLine(pen, scaledPoints[0], scaledPoints[1]);
-            }
-            else if (!rounded)
-            {
-                g.DrawLines(pen, scaledPoints);
+                CurrentBumperSpeed = (Bumper.RequestedPosition - Bumper.Position) / (float)timeSinceLastUpdate.TotalSeconds;
+                Bumper.Position = Bumper.RequestedPosition;
             }
             else
             {
-                float radius = 25;
-                PointF A, B, C, P, Q;
-                Line AB, BC;
-
-                A = points[0];
-                B = points[1];
-                AB = new(A, B);
-                //DrawLine(g, smallPen, A, B);
-                P = AB.GetPointAtDistance(Math.Min(radius, AB.Length / 2));
-                DrawLine(g, lPen, A, P);
-                for (int i = 2; i < points.Count; i++)
-                {
-                    //DrawPoint(g, pColor, B);
-                    C = points[i];
-                    BC = new(B, C);
-                    Q = BC.GetPointAtDistance(Math.Min(radius, BC.Length / 2));
-                    DrawBezier(g, bPen, P, B, B, Q);
-
-                    P = BC.GetPointAtDistance(Math.Min(radius, BC.Length / 2), false);
-                    DrawLine(g, lPen, Q, P);
-
-                    //DrawPoint(g, pColor, P);
-                    //DrawPoint(g, pColor, Q);
-
-                    A = B;
-                    B = C;
-                    AB = new(A, B);
-                    //DrawLine(g, smallPen, A, B);
-                }
-                B = points[^2];
-                C = points[^1];
-                BC = new(B, C);
-                //DrawLine(g, smallPen, B, C);
-                Q = BC.GetPointAtDistance(Math.Min(radius, BC.Length / 2));
-                DrawLine(g, lPen, Q, C);
+                CurrentBumperSpeed = default;
             }
+            BumperSpeedHistory.Enqueue(CurrentBumperSpeed);
+            while(BumperSpeedHistory.Count > BumperSpeedQueueLength) { BumperSpeedHistory.TryDequeue(out var oldBumperSpeed); }
+            var totalSpeed = new Vector2();
+            foreach( var s in BumperSpeedHistory)
+            {
+                totalSpeed += s;
+            }
+            var avgSpeed = totalSpeed / BumperSpeedHistory.Count;
+            Bumper.Speed = avgSpeed;
+            //float rotation = (float)timeSinceLastUpdate.TotalSeconds * rotationEachSecond;
+
+            //balls[0].Theta = (balls[0].Theta + rotation).NormalizeRadians();
+            //balls[1].Theta = (balls[1].Theta + (rotation * 0.83f)).NormalizeRadians();
+            var bogeysOOB = new List<int>();
+            foreach (var bogeyEntry in Bogeys)
+            {
+                var bogey = bogeyEntry.Value;
+                var origPos = bogey.Position;
+                var newPos = bogey.Position + bogey.Speed * (float)timeSinceLastUpdate.TotalSeconds;
+                var newBounds = new RectangleF(newPos.X - bogey.Radius, newPos.Y + bogey.Radius, bogey.Diameter, bogey.Diameter);
+                if (!ScaleBounds.ScaleIntersects(newBounds))
+                {
+                    bogeysOOB.Add(bogeyEntry.Key);
+                    continue;
+                }
+                bogey.Position = newPos;
+                if (Bumper.IsCollidingWith(bogey))
+                {
+                    bogey.IsBeingBumped = true;
+                    bogey.Position = bogey.PositionOutsideBumper(Bumper);
+                    //bogey.Position = origPos;
+                    //bogey.Speed = -bogey.Speed;
+                    bogey.Speed = bogey.ExitVelocity(Bumper);
+
+                }
+                else
+                {
+                    bogey.IsBeingBumped = false;
+                }
+            }
+
+            foreach (int bogeyKey in bogeysOOB)
+            {
+                Bogeys.Remove(bogeyKey, out var _);
+            }
+
+            LastUpdateTicks = GameClock.ElapsedTicks;
         }
 
-        private void DrawPoint(Graphics g, Color color, PointF p)
+        private void DrawObjects(SKCanvas c)
         {
-            var pointSize = 4;
-            var rect = new RectangleF(p.X - pointSize / 2, p.Y + pointSize / 2, pointSize, pointSize);
-            g.FillRectangle(new SolidBrush(color), ScaleToClient(rect));
+            foreach (var ball in Bogeys.Values)
+            {
+                DrawBall(c, ball);
+            }
+            DrawBall(c, Bumper);
         }
 
-        private void DrawBezier(Graphics g, Pen pen, PointF p1, PointF p2, PointF p3, PointF p4)
+        private void DrawBall(SKCanvas c, Ball ball)
         {
-            g.DrawBezier(pen, ScaleToClient(p1), ScaleToClient(p2), ScaleToClient(p3), ScaleToClient(p4));
+            var clientBallBounds = ScaleToClient(ball.Bounds);
+            c.DrawBitmap(ball.Bitmap, new SKPoint(clientBallBounds.Left, clientBallBounds.Top));
         }
 
-        private void DrawGrid(Graphics g)
+        public void DrawEverything(SKCanvas c)
         {
-            float gridSpacing_Major = 50;
-            float gridSpacing_Minor = 10;
+            c.Clear(Color_Background);
+            DrawGrid(c);
+            DrawObjects(c);
+        }
 
-            var gridPen_Major = new Pen(Color.FromArgb(0x40, 0x40, 0x50), 1) { DashPattern = new float[] { 1, 4 } };
-            var gridPen_Minor = new Pen(Color.FromArgb(0x1f, 0x1f, 0x58), 1) { DashPattern = new float[] { 1, 4 } };
-            var axesPen = new Pen(Color.FromArgb(0x40, 0x40, 0x50), 2) { DashPattern = new float[] { 3, 8 } };
+        private void DrawGrid(SKCanvas c)
+        {
+            float gridSpacingMajor = 50;
+            float gridSpacingMinor = 10;
 
-            for (float x = 0; x >= ScaleLeft; x -= gridSpacing_Minor) DrawLine(g, (x % gridSpacing_Major == 0) ? gridPen_Major : gridPen_Minor, new PointF(x, ScaleTop), new PointF(x, ScaleBottom));
-            for (float x = 0; x <= ScaleRight; x += gridSpacing_Minor) DrawLine(g, (x % gridSpacing_Major == 0) ? gridPen_Major : gridPen_Minor, new PointF(x, ScaleTop), new PointF(x, ScaleBottom));
-            for (float y = 0; y <= ScaleTop; y += gridSpacing_Minor) DrawLine(g, (y % gridSpacing_Major == 0) ? gridPen_Major : gridPen_Minor, new PointF(ScaleLeft, y), new PointF(ScaleRight, y));
-            for (float y = 0; y >= ScaleBottom; y -= gridSpacing_Minor) DrawLine(g, (y % gridSpacing_Major == 0) ? gridPen_Major : gridPen_Minor, new PointF(ScaleLeft, y), new PointF(ScaleRight, y));
-            DrawLine(g, axesPen, new PointF(0, ScaleTop), new PointF(0, ScaleBottom));
-            DrawLine(g, axesPen, new PointF(ScaleLeft, 0), new PointF(ScaleRight, 0));
+            var paintMajor = new SKPaint { Color = Color_MajorGridLine, PathEffect = SKPathEffect.CreateDash(new float[] { 2, 2 }, 0) };
+            var paintMinor = new SKPaint { Color = Color_MinorGridLine, PathEffect = SKPathEffect.CreateDash(new float[] { 2, 2 }, 0) };
+            var paintAxes = new SKPaint { Color = Color_Axis, StrokeWidth = 2, PathEffect = SKPathEffect.CreateDash(new float[] { 6, 4, 2, 4 }, 0) };
+
+            for (float x = -gridSpacingMinor; x >= ScaleLeft; x -= gridSpacingMinor) DrawLine(c, (x % gridSpacingMajor == 0) ? paintMajor : paintMinor, new PointF(x, ScaleTop), new PointF(x, ScaleBottom));
+            for (float x = gridSpacingMinor; x <= ScaleRight; x += gridSpacingMinor) DrawLine(c, (x % gridSpacingMajor == 0) ? paintMajor : paintMinor, new PointF(x, ScaleTop), new PointF(x, ScaleBottom));
+            for (float y = gridSpacingMinor; y <= ScaleTop; y += gridSpacingMinor) DrawLine(c, (y % gridSpacingMajor == 0) ? paintMajor : paintMinor, new PointF(ScaleLeft, y), new PointF(ScaleRight, y));
+            for (float y = -gridSpacingMinor; y >= ScaleBottom; y -= gridSpacingMinor) DrawLine(c, (y % gridSpacingMajor == 0) ? paintMajor : paintMinor, new PointF(ScaleLeft, y), new PointF(ScaleRight, y));
+            DrawLine(c, paintAxes, new PointF(0, 0), new PointF(0, ScaleTop));
+            DrawLine(c, paintAxes, new PointF(0, 0), new PointF(0, ScaleBottom));
+            DrawLine(c, paintAxes, new PointF(0, 0), new PointF(ScaleLeft, 0));
+            DrawLine(c, paintAxes, new PointF(0, 0), new PointF(ScaleRight, 0));
+        }
+
+        private void DrawLine(SKCanvas c, SKPaint paint, float x0, float y0, float x1, float y1)
+        {
+            var sp0 = ScaleToClient(new PointF(x0, y0));
+            var sp1 = ScaleToClient(new PointF(x1, y1));
+            c.DrawLine(sp0.X, sp0.Y, sp1.X, sp1.Y, paint);
+        }
+
+        private void DrawLine(SKCanvas c, SKPaint paint, PointF p0, PointF p1)
+        {
+            var sp0 = ScaleToClient(p0);
+            var sp1 = ScaleToClient(p1);
+            c.DrawLine(sp0.X, sp0.Y, sp1.X, sp1.Y, paint);
         }
 
         public Point ScaleToClient(PointF p)
         {
-            //if (ClientWidth == 1000) { }
             if (ScaleWidth / ClientWidth != ScaleHeight / ClientHeight) { }
             var pClient = new Point((int)Math.Round((p.X - ScaleLeft) / ScaleWidth * ClientWidth), (int)Math.Round(-(p.Y - ScaleTop) / ScaleHeight * ClientHeight));
             return pClient;
@@ -249,14 +269,6 @@ namespace DanceBalls
         public void SetScale(Rectangle clientBounds)
         {
             ClientBounds = clientBounds;
-            lock(BitmapLocker)
-            {
-                Bitmap?.Dispose();
-                Bitmap = new(ClientBounds.Width, ClientBounds.Height);
-            }
-
-            //ScaleHeight drives the rest of the Scale dimensions;
-            ScaleHeight = 200f;
             ScaleCenter = new PointF(0f, 0f);
             AspectRatio = (float)ClientBounds.Width / ClientBounds.Height;
             ScaleWidth = ScaleHeight * AspectRatio;
@@ -267,6 +279,10 @@ namespace DanceBalls
             ScaleBottom = -ScaleHeight / 2;
             ClientWidth = ClientBounds.Width;
             ClientHeight = ClientBounds.Height;
+            ScaleFactor = ClientHeight / ScaleHeight;
+            Bumper?.SetScale(ScaleFactor);
+            foreach(var bogey in Bogeys.Values) bogey.SetScale(ScaleFactor);
         }
+
     }
 }
