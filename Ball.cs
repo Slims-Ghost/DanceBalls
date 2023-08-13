@@ -1,86 +1,89 @@
 ﻿using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using System.Drawing.Text;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-//using PointF = Microsoft.Maui.Graphics.PointF;
-//using Point = Microsoft.Maui.Graphics.Point;
-//using SizeF = Microsoft.Maui.Graphics.SizeF;
-//using Size = Microsoft.Maui.Graphics.Size;
-//using Color = Microsoft.Maui.Graphics.Color;
+using System.Numerics;
+
 namespace DanceBalls
 {
     internal class Ball
     {
-        public float D { get { return _D; } set { _D = value; SetXY(); } }
-        public float Theta { get { return _Theta; } set { _Theta = value; SetXY(); } }
-        public float X { get { return _X; } set { _X = value; SetDTheta(); } }
-        public float Y { get { return _Y; } set { _Y = value; SetDTheta(); } }
+        public Vector2 Position { get; set; }
+        public Vector2 Speed { get; set; }
+        public Vector2 Acceleration { get; set; }
         public float Radius { get; set; }
         public Color Color { get; set; }
         public SKBitmap Bitmap { get; set; }
+        private readonly object BitmapLocker = new();
+        public float X { get { return Position.X; } }
+        public float Y { get { return Position.Y; } }
         public PointF Center { get { return new PointF(X, Y); } }
         public float Diameter { get { return 2 * Radius; } }
         public RectangleF Bounds { get { return new RectangleF(X - Radius, Y + Radius, Diameter, Diameter); } }
-        private string ImgPath;
-        private float _D;
-        private float _Theta;
-        private float _X;
-        private float _Y;
-        private float ScaleFactor;
+        protected Game Game { get; set; }
+        protected string ImgPath;
+        protected float ScaleFactor;
 
-        //public Ball(float x, float y, float radius, float scaleFactor)
-        //{
-        //    _X = x;
-        //    _Y = y;
-        //    Radius= radius;
-        //    ScaleFactor = scaleFactor;
-        //    Bitmap = new(1, 1);
-        //}
-
-        public void SetScale(float ScaleFactor)
+        public void SetScale(float scaleFactor)
         {
-            Bitmap = GetBallBitmap(ImgPath, new Size((int)(Radius * 2 * ScaleFactor), (int)(Radius * 2 * ScaleFactor)));
+            if (scaleFactor == 0 || ImgPath == null) return;
+            Bitmap?.Dispose();
+            Bitmap = GetBallBitmap(ImgPath, new Size((int)(Radius * 2 * scaleFactor), (int)(Radius * 2 * scaleFactor)));
         }
 
-        public Ball(float d, float theta, float radius, string imgPath, float scaleFactor)
+        public Ball(Game game, float x, float y, float radius, string imgPath)
+            : this(game, new Vector2(x, y), radius, imgPath)
+        { }
+
+        public Ball(Game game, Vector2 position, float radius, string imgPath)
         {
-            D = d;
-            Theta = theta;
+            Game = game;
+            Position = position;
             Radius = radius;
             ImgPath = imgPath;
-            ScaleFactor = scaleFactor;
-            Bitmap = GetBallBitmap(imgPath, new Size((int)(Radius * 2 * ScaleFactor), (int)(Radius * 2 * ScaleFactor)));
-
+            SetScale(Game.ScaleFactor);
         }
 
-        private void SetDTheta()
+        public Ball(Game game, Vector2 position, float radius, Vector2 speed, string imgPath)
+            : this(game, position, radius, imgPath)
         {
-            _D = (float)Math.Sqrt(X * X + Y * Y);
-            _Theta = (float)(Math.Acos(X) + Y < 0 ? Math.PI : 0);
+            Speed = speed;
         }
 
-        private void SetXY()
+        public bool IsCollidingWith(Ball otherBall)
         {
-            _X = D * (float)Math.Cos(Theta);
-            _Y = D * (float)Math.Sin(Theta);
+            return (Center.DistanceFrom(otherBall.Center) < Radius + otherBall.Radius);
         }
 
-        private static SKBitmap GetBallBitmap(string imgPath, Size newSize)
+        public static bool WouldCollideWith(PointF position, float radius, Ball ball)
         {
-            //string imgPath = ;
-            string sizedImgPath = imgPath.Replace(".png", "small.png");
-            //using FileStream fs = new(imgPath, FileMode.Open);
-            Bitmap baseBitmap = (Bitmap)Image.FromFile(imgPath);
-            Bitmap sizedBitmap = Helpers.ResizeImage(baseBitmap, newSize.Width, newSize.Height);
-            using MemoryStream ms = new();
-            //sizedBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-            sizedBitmap.Save(sizedImgPath, System.Drawing.Imaging.ImageFormat.Png);
-            using FileStream fs = new(sizedImgPath, FileMode.Open);
-            var skBitmap = SKBitmap.Decode(fs);
-            return skBitmap;
+            return (position.DistanceFrom(ball.Center) < radius + ball.Radius);
+        }
+
+        private SKBitmap GetBallBitmap(string imgPath, Size newSize)
+        {
+            lock (BitmapLocker)
+            {
+                Bitmap baseBitmap = (Bitmap)Image.FromFile(imgPath);
+                Bitmap sizedBitmap = Helpers.ResizeImage(baseBitmap, newSize.Width, newSize.Height);
+                //using MemoryStream ms = new();
+                //sizedBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+                //var skBitmap = SKBitmap.Decode(ms);
+
+                string sizedImgPath = imgPath.Replace(".png", "small.png");
+                try
+                {
+                    sizedBitmap.Save(sizedImgPath, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+                using FileStream fs = new(sizedImgPath, FileMode.Open);
+                var skBitmap = SKBitmap.Decode(fs);
+
+                return skBitmap;
+            }
         }
     }
 }

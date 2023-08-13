@@ -1,5 +1,3 @@
-using TestMauiGraphics;
-
 namespace DanceBalls
 {
     internal static class Program
