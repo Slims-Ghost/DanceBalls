@@ -32,13 +32,20 @@ namespace DanceBalls
         public static bool ScaleIntersects(this RectangleF rect1, RectangleF rect2)
         {
             //var x = rect1.ScaleContains(rect2.Top, rect2.Left);
+            var totallyAbove = ((rect2.Top - rect2.Height) > rect1.Top);
+            var totallyBelow = (rect2.Top < (rect1.Top - rect1.Height));
+            var totallyRight = (rect2.Left > rect1.Right);
+            var totallyLeft = (rect2.Right < rect1.Left);
+            var x = !totallyAbove && !totallyBelow && !totallyLeft && !totallyRight;
 
-            var x = (
-                rect1.ScaleContains(rect2.Left, rect2.Top) || 
-                rect1.ScaleContains(rect2.Right, rect2.Top - rect2.Height) ||
-                rect2.ScaleContains(rect1.Left, rect1.Top) ||
-                rect2.ScaleContains(rect1.Right, rect2.Top - rect2.Height)
-                );
+            //var x = (rect1.Left < rect2.Right && rect1.Right > rect2.Left && rect1.Top > rect2.Bottom && rect1.Bottom < rect2.Top);
+
+            //var x = (
+            //    rect1.ScaleContains(rect2.Left, rect2.Top) || 
+            //    rect1.ScaleContains(rect2.Right, rect2.Top - rect2.Height) ||
+            //    rect2.ScaleContains(rect1.Left, rect1.Top) ||
+            //    rect2.ScaleContains(rect1.Right, rect1.Top - rect1.Height)
+            //    );
             //if (!x) { }
             return x;
         }

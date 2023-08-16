@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
+using System.Collections.Concurrent;
 
 namespace DanceBalls
 {
@@ -11,10 +12,35 @@ namespace DanceBalls
     {
         public bool IsActive { get; set; }
         public Vector2 RequestedPosition { get; set; }
+        public ConcurrentQueue<Vector2> BumperSpeedHistory = new();
+        private const int BumperSpeedQueueLength = 10;
 
         public Bumper(Game game, float x, float y, float radius)
             : base(game, new Vector2(x, y), radius, Path.Combine(Game.AppRoot, "blue orb.png"))
         {
+        }
+
+        public void Update(float secondsSinceLastUpdate)
+        {
+            Vector2 CurrentBumperSpeed;
+            if (RequestedPosition != Position)
+            {
+                CurrentBumperSpeed = (RequestedPosition - Position) / secondsSinceLastUpdate;
+                Position = RequestedPosition;
+            }
+            else
+            {
+                CurrentBumperSpeed = default;
+            }
+            BumperSpeedHistory.Enqueue(CurrentBumperSpeed);
+            while (BumperSpeedHistory.Count > BumperSpeedQueueLength) { BumperSpeedHistory.TryDequeue(out var oldBumperSpeed); }
+            var totalSpeed = new Vector2();
+            foreach (var s in BumperSpeedHistory)
+            {
+                totalSpeed += s;
+            }
+            var avgSpeed = totalSpeed / BumperSpeedHistory.Count;
+            Speed = avgSpeed;
         }
 
         public void RequestMoveTo(Point clientLocation, Point clientOffset)

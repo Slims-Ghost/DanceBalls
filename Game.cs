@@ -36,14 +36,14 @@ namespace DanceBalls
         private float rotationEachSecond = ONE_PI;
         public Bumper Bumper { get; set; }
         public ConcurrentDictionary<int, Bogey> Bogeys = new();
-        public ConcurrentQueue<Vector2> BumperSpeedHistory = new();
-        private const int BumperSpeedQueueLength = 10;
+        public List<Goal> Goals = new();
         public static int BogeySequence = 0;
         private Random rand = new();
         private SKColor Color_MajorGridLine = new(0x40, 0x40, 0x70);
         private SKColor Color_MinorGridLine = new(0x10, 0x10, 0x40);
         private SKColor Color_Axis = new(0x40, 0x40, 0x70);
         private SKColor Color_Background = new(0x0, 0x0, 0x14);
+        private SKColor Color_Goals = SKColor.Parse("afaf00");
         #endregion
 
         public Game(Rectangle clientBounds) 
@@ -52,6 +52,7 @@ namespace DanceBalls
             //ScaleHeight drives the rest of the Scale dimensions;
             ScaleHeight = 200f;
             SetScale(clientBounds);
+            InitGoals();
             InitBalls();
             SetScale(clientBounds);
 
@@ -80,6 +81,14 @@ namespace DanceBalls
 
             var bogeyGen = new BogeyGenerator(this);
             bogeyGen.Start();
+        }
+
+        private void InitGoals()
+        {
+            Goal g1 = new(new RectangleF(ScaleLeft, ScaleTop, ScaleWidth * 0.2f, 10));
+            Goals.Add(g1);
+            Goal g2 = new(new RectangleF(ScaleLeft + 0.8f * ScaleWidth, ScaleTop, ScaleWidth * 0.2f, 10));
+            Goals.Add(g2);
         }
         public void AddBogey(Bogey bogey)
         {
@@ -124,30 +133,10 @@ namespace DanceBalls
         {
             TicksSinceLastUpdate = LastUpdateTicks == 0 ? 0 : GameClock.ElapsedTicks - LastUpdateTicks;
             var timeSinceLastUpdate = TimeSpan.FromTicks(TicksSinceLastUpdate);
+            var secondsSinceLastUpdate = (float)timeSinceLastUpdate.TotalSeconds;
 
-            Vector2 CurrentBumperSpeed;
-            if (Bumper.RequestedPosition != Bumper.Position)
-            {
-                CurrentBumperSpeed = (Bumper.RequestedPosition - Bumper.Position) / (float)timeSinceLastUpdate.TotalSeconds;
-                Bumper.Position = Bumper.RequestedPosition;
-            }
-            else
-            {
-                CurrentBumperSpeed = default;
-            }
-            BumperSpeedHistory.Enqueue(CurrentBumperSpeed);
-            while(BumperSpeedHistory.Count > BumperSpeedQueueLength) { BumperSpeedHistory.TryDequeue(out var oldBumperSpeed); }
-            var totalSpeed = new Vector2();
-            foreach( var s in BumperSpeedHistory)
-            {
-                totalSpeed += s;
-            }
-            var avgSpeed = totalSpeed / BumperSpeedHistory.Count;
-            Bumper.Speed = avgSpeed;
-            //float rotation = (float)timeSinceLastUpdate.TotalSeconds * rotationEachSecond;
+            Bumper.Update(secondsSinceLastUpdate);
 
-            //balls[0].Theta = (balls[0].Theta + rotation).NormalizeRadians();
-            //balls[1].Theta = (balls[1].Theta + (rotation * 0.83f)).NormalizeRadians();
             var bogeysOOB = new List<int>();
             foreach (var bogeyEntry in Bogeys)
             {
@@ -186,11 +175,42 @@ namespace DanceBalls
 
         private void DrawObjects(SKCanvas c)
         {
+            DrawGoals(c);
             foreach (var ball in Bogeys.Values)
             {
                 DrawBall(c, ball);
             }
             DrawBall(c, Bumper);
+        }
+
+        private void DrawGoals(SKCanvas c)
+        {
+            SKPaint paintGoalNormal = new() { Color = Color_Goals, StrokeWidth = 1 };
+            SKPaint paintGoalScore = new() { Color = SKColor.Parse("f08000"), StrokeWidth = 1 };
+
+            foreach (var goal in Goals)
+            {
+                var clientRect = ScaleToClient(goal.Bounds);
+                SKPaint paintGoal;
+                //if (Bogeys.Values.Any(b => goal.IsInGoal(b)))
+                if (Bogeys.Values.Any(b => b.IsInGoal(goal)))
+                {
+                    //var b = Bogeys.Values.First(b => goal.IsInGoal(b));
+                    //if (b.Bounds.Top < 90) 
+                    //{
+                    //    if (goal.Bounds.ScaleIntersects(b.Bounds))
+                    //    {
+
+                    //    }
+                    //}
+                    paintGoal = paintGoalScore;
+                }
+                else
+                {
+                    paintGoal = paintGoalNormal;
+                }
+                c.DrawRect(new SKRect(clientRect.Left, clientRect.Top, clientRect.Right, clientRect.Bottom), paintGoal);
+            }
         }
 
         private void DrawBall(SKCanvas c, Ball ball)
