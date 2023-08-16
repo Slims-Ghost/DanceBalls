@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Collections.Concurrent;
+using NAudio.Wave;
 
 namespace DanceBalls
 {
@@ -54,6 +55,11 @@ namespace DanceBalls
             SetScale(clientBounds);
             InitBalls();
             SetScale(clientBounds);
+
+            var reader = new WaveFileReader(Path.Combine(AppRoot, "goal.wav"));
+            var waveOut = new WaveOut();
+            waveOut.Init(reader);
+            waveOut.Play();
 
             GameState = GameState.Ready;
             GameClock.Start();
