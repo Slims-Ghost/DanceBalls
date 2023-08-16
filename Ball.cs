@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Windows.Forms.VisualStyles;
 
 namespace DanceBalls
 {
@@ -23,6 +24,13 @@ namespace DanceBalls
         protected Game Game { get; set; }
         protected string ImgPath;
         protected float ScaleFactor;
+
+        public bool IsInGoal(Goal goal)
+        {
+            RectangleF rect = goal.Bounds;
+            var x = (Center.X.Between(rect.Left - Radius, rect.Right + Radius) && Center.Y.Between(rect.Top - rect.Height - Radius, rect.Top + Radius));
+            return x;
+        }
 
         public void SetScale(float scaleFactor)
         {
